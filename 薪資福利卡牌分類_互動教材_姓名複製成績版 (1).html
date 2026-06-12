@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>薪資福利卡牌分類｜互動教材</title>
+  <!-- 學生姓名與一鍵複製成績版：可輸入姓名，完成後一鍵複製包含各次得分、檢查次數與累計時間的成績報告 -->
+  <style>
+    :root {
+      --teal: #006d73;
+      --teal2: #0c8a8f;
+      --orange: #f26b1d;
+      --orange2: #ff9f1c;
+      --green: #4f8a3b;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --line: #dbe4ea;
+      --ok: #15803d;
+      --bad: #b91c1c;
+      --warn: #b45309;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(242,107,29,.10), transparent 28rem),
+        radial-gradient(circle at bottom right, rgba(0,109,115,.12), transparent 30rem),
+        var(--bg);
+      color: var(--ink);
+    }
+    header {
+      padding: 26px 28px 18px;
+      background: linear-gradient(135deg, #ffffff 0%, #eefafa 100%);
+      border-bottom: 4px solid var(--teal);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, .08);
+    }
+    .title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      margin: 0;
+      color: var(--teal);
+      font-size: clamp(1.8rem, 3.2vw, 3rem);
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+    .subtitle {
+      margin: 8px 0 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .hr-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--teal);
+      color: white;
+      border-radius: 999px;
+      padding: 10px 18px;
+      font-weight: 900;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+      white-space: nowrap;
+    }
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .instruction {
+      background: #fff7ed;
+      border: 2px dashed var(--orange);
+      border-radius: 18px;
+      padding: 14px 16px;
+      line-height: 1.65;
+      font-weight: 700;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+    }
+    button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(15,23,42,.16); }
+    button:active { transform: translateY(0); box-shadow: none; }
+    .primary { background: var(--teal); color: white; }
+    .secondary { background: var(--orange); color: white; }
+    .ghost { background: #e2e8f0; color: var(--ink); }
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .student-panel {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      background: white;
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 14px 16px;
+      margin: 0 0 18px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+    }
+    .student-field {
+      display: grid;
+      gap: 6px;
+    }
+    .student-field label {
+      color: var(--teal);
+      font-weight: 900;
+      font-size: 1rem;
+    }
+    .student-field input {
+      width: 100%;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--ink);
+      background: #f8fafc;
+      outline: none;
+    }
+    .student-field input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 4px rgba(0, 109, 115, .12);
+      background: white;
+    }
+    .copy-area {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .copy-status {
+      min-width: 180px;
+      color: var(--muted);
+      font-weight: 900;
+      font-size: .92rem;
+      text-align: right;
+    }
+    .report-preview {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-height: 94px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", Arial, sans-serif;
+      font-size: .9rem;
+      line-height: 1.55;
+      color: #334155;
+      background: #f8fafc;
+      resize: vertical;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 14px;
+      margin: 0 0 18px;
+    }
+    .status-card {
+      background: white;
+      border: 2px solid var(--line);
+      border-radius: 20px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+      display: grid;
+      gap: 4px;
+    }
+    .status-card span {
+      color: var(--muted);
+      font-weight: 900;
+      font-size: .95rem;
+    }
+    .status-card strong {
+      color: var(--teal);
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: .02em;
+    }
+    .status-card small {
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .score-history {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      font-size: .86rem;
+      font-weight: 800;
+      line-height: 1.55;
+      max-height: 86px;
+      overflow: auto;
+    }
+    .score-history span {
+      display: inline-block;
+      margin: 2px 4px 2px 0;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #e6fffb;
+      color: var(--teal);
+      font-weight: 900;
+      font-size: .82rem;
+    }
+    .sound-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .sound-toggle {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: var(--ink);
+      font-size: .82rem;
+      padding: 6px 10px;
+      border-radius: 999px;
+      box-shadow: none !important;
+    }
+    .timer-warning strong { color: var(--warn); }
+    .timer-danger strong { color: var(--bad); }
+    .card.locked {
+      cursor: not-allowed;
+      opacity: .78;
+    }
+    .dropzone.not-started {
+      filter: grayscale(.12);
+      opacity: .78;
+    }
+    .not-started-note {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #fff7ed;
+      border: 2px dashed var(--orange);
+      color: #9a3412;
+      font-weight: 900;
+      text-align: center;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 370px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+    .bank, .dropzone {
+      background: rgba(255,255,255,.94);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 14px;
+      min-height: 160px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+    }
+    .bank {
+      position: sticky;
+      top: 156px;
+      max-height: calc(100vh - 180px);
+      overflow: auto;
+    }
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 12px;
+      color: var(--teal);
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .count-pill {
+      display: inline-flex;
+      min-width: 34px;
+      justify-content: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #e6fffb;
+      color: var(--teal);
+      font-size: .9rem;
+      border: 1px solid #99f6e4;
+    }
+    .card-stack {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .activity-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .plate {
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .plate::before {
+      content: "";
+      position: absolute;
+      inset: 58px 16px 16px;
+      border-radius: 50%;
+      border: 3px dashed rgba(100,116,139,.25);
+      pointer-events: none;
+    }
+    .plate.salary { border-color: #7dd3fc; }
+    .plate.benefit { border-color: #86efac; }
+    .plate.unsure { border-color: #fdba74; }
+    .zone-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      padding: 11px 12px;
+      border-radius: 16px;
+      color: white;
+      font-weight: 900;
+      font-size: 1.25rem;
+      position: relative;
+      z-index: 2;
+    }
+    .salary .zone-head { background: linear-gradient(135deg, var(--teal), #0891b2); }
+    .benefit .zone-head { background: linear-gradient(135deg, #2f7d32, #65a30d); }
+    .unsure .zone-head { background: linear-gradient(135deg, var(--orange), var(--orange2)); }
+    .drop-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-content: start;
+      gap: 10px;
+      min-height: 430px;
+      position: relative;
+      z-index: 2;
+      padding-bottom: 8px;
+    }
+    .card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+      background: var(--card);
+      border: 2px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 12px;
+      cursor: grab;
+      box-shadow: 0 4px 12px rgba(15,23,42,.08);
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      position: relative;
+      user-select: none;
+    }
+    .card:active { cursor: grabbing; }
+    .card:hover { border-color: var(--teal2); transform: translateY(-1px); }
+    .card.dragging { opacity: .55; transform: scale(.98); }
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: #f1f5f9;
+      font-size: 1.6rem;
+    }
+    .term {
+      font-size: 1.12rem;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+    .vn {
+      color: var(--muted);
+      font-size: .85rem;
+      margin-top: 2px;
+      font-weight: 700;
+    }
+    .hint {
+      grid-column: 1 / -1;
+      color: #334155;
+      font-size: .86rem;
+      line-height: 1.45;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border-left: 4px solid #cbd5e1;
+      display: none;
+    }
+    .show-hint .hint { display: block; }
+    .mobile-actions {
+      grid-column: 1 / -1;
+      display: none;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .mini-btn {
+      font-size: .78rem;
+      padding: 7px 8px;
+      border-radius: 10px;
+      flex: 1;
+    }
+    .move-salary { background: #e0f2fe; color: #075985; }
+    .move-benefit { background: #dcfce7; color: #166534; }
+    .move-unsure { background: #ffedd5; color: #9a3412; }
+    .correct { border-color: var(--ok) !important; background: #f0fdf4; }
+    .incorrect { border-color: var(--bad) !important; background: #fef2f2; }
+    .pending { border-color: var(--warn) !important; background: #fffbeb; }
+    .tag {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: .76rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    .tag.ok { color: var(--ok); background: #dcfce7; }
+    .tag.bad { color: var(--bad); background: #fee2e2; }
+    .tag.warn { color: var(--warn); background: #fef3c7; }
+    .feedback {
+      margin: 18px 0 0;
+      background: white;
+      border-radius: 22px;
+      border: 2px solid var(--line);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+    }
+    .feedback h2 {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 1.35rem;
+    }
+    .score {
+      font-size: 1.15rem;
+      font-weight: 900;
+      margin: 8px 0;
+    }
+    .feedback-list {
+      margin: 8px 0 0;
+      padding-left: 1.2rem;
+      line-height: 1.75;
+    }
+    .hidden { display: none; }
+    .answer-key {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .key-box {
+      background: white;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .key-box h3 {
+      margin: 0 0 8px;
+      color: var(--teal);
+    }
+    .key-box ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      line-height: 1.7;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 980px) {
+      header { position: static; }
+      .toolbar, .layout, .status-grid, .student-panel {
+        grid-template-columns: 1fr;
+      }
+      .copy-area {
+        justify-content: stretch;
+      }
+      .copy-area button {
+        flex: 1;
+      }
+      .copy-status {
+        min-width: auto;
+        text-align: left;
+      }
+      .bank {
+        position: static;
+        max-height: none;
+      }
+      .activity-board {
+        grid-template-columns: 1fr;
+      }
+      .plate { min-height: 330px; }
+      .drop-content { min-height: 250px; }
+      .mobile-actions { display: flex; }
+      .answer-key { grid-template-columns: 1fr; }
+    }
+    @media print {
+      header, .toolbar, .activity-board, .feedback { display: none !important; }
+      body { background: white; }
+      main { max-width: none; }
+      .bank { position: static; max-height: none; border: 0; box-shadow: none; }
+      .card-stack {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      .card { break-inside: avoid; min-height: 94px; }
+      .mobile-actions { display: none !important; }
+      .hint { display: block; }
+      .answer-key { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-row">
+      <div>
+        <h1>薪資福利卡牌分類</h1>
+        <p class="subtitle">按「開始計時」後，才能把 20 張卡片拖曳到「薪資／福利／不確定」盤子中；每次限時 75 秒，累計總時間達 300 秒會自動停止作答。</p>
+      </div>
+      <div class="hr-badge">👥 HR 人力資源部</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="活動說明與操作">
+      <div class="instruction">
+        <strong>任務：</strong>請先按「開始計時」。每次作答限時 75 秒，並搭配時鐘滴答聲；累計總時間達 300 秒時，系統會自動停止作答。還不確定時，可以先放到「不確定」盤子。<br>
+        <strong>分類線索：</strong>薪資＝工作報酬；福利＝公司給員工的支持與照顧。
+      </div>
+      <div class="buttons">
+        <button class="primary" id="timerBtn">開始計時</button>
+        <button class="ghost" id="resetTimerBtn">重設計時</button>
+        <button class="primary" id="checkBtn">檢查答案</button>
+        <button class="secondary" id="shuffleBtn">重新洗牌並清空盤子</button>
+        <button class="ghost" id="hintBtn">顯示／隱藏提示</button>
+      </div>
+    </section>
+
+    <section class="student-panel" aria-label="學生姓名與複製成績">
+      <div class="student-field">
+        <label for="studentName">👤 學生姓名</label>
+        <input id="studentName" type="text" placeholder="請輸入姓名，例如：Nguyen Van A" autocomplete="name" />
+      </div>
+      <div class="copy-area">
+        <button class="primary" id="copyReportBtn" type="button">一鍵複製成績</button>
+        <span class="copy-status" id="copyStatus">完成後請複製成績給老師</span>
+      </div>
+      <textarea class="report-preview" id="reportPreview" readonly placeholder="檢查答案後，按「一鍵複製成績」會在這裡產生成績文字，並複製到剪貼簿。"></textarea>
+    </section>
+
+    <section class="status-grid" aria-label="限時、累計時間、得分與檢查次數">
+      <div class="status-card" id="timerCard">
+        <span>⏳ 限時倒數</span>
+        <strong id="timerDisplay">01:15</strong>
+        <div class="sound-line">
+          <small>每次 75 秒；開始計時播放滴答聲</small>
+          <button class="sound-toggle" id="soundBtn" type="button">🔊 滴答聲：開</button>
+        </div>
+      </div>
+      <div class="status-card" id="totalTimeCard">
+        <span>🕒 累計總時間</span>
+        <strong id="totalTimeDisplay">00:00／05:00</strong>
+        <small>達 300 秒會自動停止作答</small>
+      </div>
+      <div class="status-card">
+        <span>⭐ 各次作答的得分</span>
+        <strong id="scoreDisplay">尚未作答</strong>
+        <small>每張正確 5 分，共 100 分</small>
+        <div class="score-history" id="scoreHistoryDisplay">尚未檢查答案</div>
+      </div>
+      <div class="status-card">
+        <span>🔁 檢查次數</span>
+        <strong id="attemptDisplay">0 次</strong>
+        <small>每按一次「檢查答案」加 1 次；重新洗牌不歸零</small>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="bank" aria-label="待分類卡牌">
+        <div class="panel-title">
+          <span>🃏 待分類卡牌</span>
+          <span class="count-pill" id="bankCount">20</span>
+        </div>
+        <div class="card-stack" id="cardBank"></div>
+      </aside>
+
+      <div class="not-started-note" id="startNote">請先按「開始計時」，盤子才會解鎖；每次 75 秒。</div>
+      <section class="activity-board" aria-label="分類盤子">
+        <div class="dropzone plate salary" data-zone="salary" aria-label="薪資盤子">
+          <div class="zone-head"><span>💵 薪資</span><span class="count-pill" id="salaryCount">0</span></div>
+          <div class="drop-content" id="salaryZone"></div>
+        </div>
+
+        <div class="dropzone plate benefit" data-zone="benefit" aria-label="福利盤子">
+          <div class="zone-head"><span>🎁 福利</span><span class="count-pill" id="benefitCount">0</span></div>
+          <div class="drop-content" id="benefitZone"></div>
+        </div>
+
+        <div class="dropzone plate unsure" data-zone="unsure" aria-label="不確定盤子">
+          <div class="zone-head"><span>❓ 不確定</span><span class="count-pill" id="unsureCount">0</span></div>
+          <div class="drop-content" id="unsureZone"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="feedback hidden" id="feedback" aria-live="polite">
+      <h2>檢查結果</h2>
+      <div id="feedbackContent"></div>
+    </section>
+
+    <section class="answer-key" aria-label="教師用卡牌答案">
+      <div class="key-box">
+        <h3>教師備註：薪資類</h3>
+        <ul id="salaryKey"></ul>
+      </div>
+      <div class="key-box">
+        <h3>教師備註：福利類</h3>
+        <ul id="benefitKey"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const cards = [{"id": "c01", "term": "底薪", "vn": "Lương cơ bản", "icon": "💵", "category": "salary", "label": "薪資", "hint": "每月固定給的工作報酬。"}, {"id": "c02", "term": "時薪", "vn": "Lương theo giờ", "icon": "⏰", "category": "salary", "label": "薪資", "hint": "依照工作時數計算的工作報酬。"}, {"id": "c03", "term": "加班費", "vn": "Tiền tăng ca", "icon": "🌙", "category": "salary", "label": "薪資", "hint": "超過正常工時後，公司依法給的工作報酬。"}, {"id": "c04", "term": "全勤獎金", "vn": "Thưởng chuyên cần", "icon": "✅", "category": "salary", "label": "薪資", "hint": "沒有遲到、早退或缺勤時給的獎金。"}, {"id": "c05", "term": "績效獎金", "vn": "Thưởng hiệu suất", "icon": "📈", "category": "salary", "label": "薪資", "hint": "依工作表現好壞發給的獎金。"}, {"id": "c06", "term": "業績分紅獎金", "vn": "Thưởng doanh thu", "icon": "🏆", "category": "salary", "label": "薪資", "hint": "餐廳業績好時，依制度分給員工的獎金。"}, {"id": "c07", "term": "年終獎金", "vn": "Thưởng cuối năm", "icon": "🧧", "category": "salary", "label": "薪資", "hint": "年底依公司制度或表現給的獎金。"}, {"id": "c08", "term": "服務獎金", "vn": "Thưởng phục vụ", "icon": "🍽️", "category": "salary", "label": "薪資", "hint": "和服務表現、顧客回饋或服務費分配有關的獎金。"}, {"id": "c09", "term": "空班津貼", "vn": "Phụ cấp ca gãy", "icon": "☕", "category": "salary", "label": "薪資", "hint": "補貼餐飲業兩段班中間等待或休息的不方便。"}, {"id": "c10", "term": "夜班津貼", "vn": "Phụ cấp ca đêm", "icon": "🌃", "category": "salary", "label": "薪資", "hint": "晚上或深夜上班時，公司加給的津貼。"}, {"id": "c11", "term": "員工餐", "vn": "Bữa ăn nhân viên", "icon": "🍱", "category": "benefit", "label": "福利", "hint": "公司提供餐點，幫員工減少生活支出。"}, {"id": "c12", "term": "排班彈性", "vn": "Lịch làm linh hoạt", "icon": "📅", "category": "benefit", "label": "福利", "hint": "公司讓員工較容易調整上班時間。"}, {"id": "c13", "term": "勞保", "vn": "Bảo hiểm lao động", "icon": "🛡️", "category": "benefit", "label": "福利", "hint": "工作中風險與退休相關的基本保障。"}, {"id": "c14", "term": "健保", "vn": "Bảo hiểm y tế", "icon": "🏥", "category": "benefit", "label": "福利", "hint": "看病、醫療時的重要保障。"}, {"id": "c15", "term": "員工宿舍", "vn": "Ký túc xá nhân viên", "icon": "🏠", "category": "benefit", "label": "福利", "hint": "公司提供住宿，幫員工降低租屋壓力。"}, {"id": "c16", "term": "租屋補貼", "vn": "Trợ cấp thuê nhà", "icon": "🔑", "category": "benefit", "label": "福利", "hint": "公司補助住宿支出，屬於支持員工生活。"}, {"id": "c17", "term": "教育訓練", "vn": "Đào tạo", "icon": "📚", "category": "benefit", "label": "福利", "hint": "公司提供學習機會，幫助員工成長。"}, {"id": "c18", "term": "證照補助", "vn": "Hỗ trợ chứng chỉ", "icon": "🎓", "category": "benefit", "label": "福利", "hint": "公司補助考照費用，支持員工專業發展。"}, {"id": "c19", "term": "員工旅遊", "vn": "Du lịch nhân viên", "icon": "🧳", "category": "benefit", "label": "福利", "hint": "公司安排或補助旅遊，提升團隊感與滿意度。"}, {"id": "c20", "term": "健康檢查", "vn": "Khám sức khỏe", "icon": "🩺", "category": "benefit", "label": "福利", "hint": "公司協助員工了解身體狀況，屬於照顧與支持。"}];
+
+    const zones = {
+      bank: document.getElementById("cardBank"),
+      salary: document.getElementById("salaryZone"),
+      benefit: document.getElementById("benefitZone"),
+      unsure: document.getElementById("unsureZone")
+    };
+
+    const labels = {
+      salary: "薪資",
+      benefit: "福利",
+      unsure: "不確定",
+      bank: "未分類"
+    };
+
+    let showHints = false;
+    const timeLimitSeconds = 75;
+    const totalTimeLimitSeconds = 300;
+    const maxScore = cards.length * 5;
+    let remainingSeconds = timeLimitSeconds;
+    let totalElapsedSeconds = 0;
+    let timerId = null;
+    let timerRunning = false;
+    let activityLocked = false;
+    let roundStarted = false;
+    let totalTimeUp = false;
+    let attemptCount = 0;
+    let lastScore = 0;
+    let scoreHistory = [];
+    let soundEnabled = true;
+    let audioContext = null;
+
+    function initAudioContext() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return null;
+
+      if (!audioContext) {
+        audioContext = new AudioContextClass();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      return audioContext;
+    }
+
+    function playTickSound() {
+      if (!soundEnabled || !timerRunning) return;
+
+      const ctx = initAudioContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      // 短促、低音量的「滴答」聲，避免干擾教室活動。
+      osc.type = "square";
+      osc.frequency.setValueAtTime(900, now);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.035, now + 0.006);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.06);
+    }
+
+    function updateSoundButton() {
+      const soundBtn = document.getElementById("soundBtn");
+      if (!soundBtn) return;
+      soundBtn.textContent = soundEnabled ? "🔊 滴答聲：開" : "🔇 滴答聲：關";
+    }
+
+    function formatTime(totalSeconds) {
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      return `${minutes}:${seconds}`;
+    }
+
+    function formatScoreHistory() {
+      if (!scoreHistory.length) return "尚未檢查答案";
+      return scoreHistory
+        .map(item => `<span>第${item.attempt}次：${item.score}／${maxScore}</span>`)
+        .join("");
+    }
+
+    function getStudentName() {
+      const input = document.getElementById("studentName");
+      return input ? input.value.trim() : "";
+    }
+
+    function buildScoreReport() {
+      const name = getStudentName() || "未填寫";
+      const now = new Date();
+      const checkedAt = now.toLocaleString("zh-TW", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const scoreLines = scoreHistory.length
+        ? scoreHistory.map(item =>
+            `第${item.attempt}次：${item.score}／${maxScore}（答對 ${item.correct}／${item.total} 張，${item.percent}%，累計時間 ${item.time}）`
+          ).join("\n")
+        : "尚未檢查答案";
+
+      const latest = scoreHistory.length
+        ? `${lastScore}／${maxScore}`
+        : "尚未作答";
+
+      const status = totalTimeUp
+        ? "累計總時間已達 300 秒，系統已停止作答"
+        : (scoreHistory.length ? "已檢查答案" : "尚未檢查答案");
+
+      return [
+        "薪資福利卡牌分類｜學生成績",
+        `學生姓名：${name}`,
+        `複製時間：${checkedAt}`,
+        `最新得分：${latest}`,
+        `檢查次數：${attemptCount} 次`,
+        `累計總時間：${formatTime(totalElapsedSeconds)}／${formatTime(totalTimeLimitSeconds)}`,
+        `狀態：${status}`,
+        "",
+        "各次作答得分：",
+        scoreLines
+      ].join("\n");
+    }
+
+    function updateReportPreview() {
+      const preview = document.getElementById("reportPreview");
+      if (preview) preview.value = buildScoreReport();
+    }
+
+    async function copyScoreReport() {
+      const nameInput = document.getElementById("studentName");
+      const copyStatus = document.getElementById("copyStatus");
+      const preview = document.getElementById("reportPreview");
+
+      if (!getStudentName()) {
+        copyStatus.textContent = "請先輸入姓名";
+        copyStatus.style.color = "var(--bad)";
+        nameInput.focus();
+        return;
+      }
+
+      const report = buildScoreReport();
+      preview.value = report;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(report);
+        } else {
+          preview.focus();
+          preview.select();
+          document.execCommand("copy");
+          window.getSelection()?.removeAllRanges();
+        }
+        copyStatus.textContent = "已複製，可貼到 LINE／表單／作業區";
+        copyStatus.style.color = "var(--ok)";
+      } catch (error) {
+        preview.focus();
+        preview.select();
+        copyStatus.textContent = "請手動按 Ctrl+C 複製";
+        copyStatus.style.color = "var(--warn)";
+      }
+    }
+
+    function updateStatus() {
+      const timerDisplay = document.getElementById("timerDisplay");
+      const totalTimeDisplay = document.getElementById("totalTimeDisplay");
+      const scoreDisplay = document.getElementById("scoreDisplay");
+      const scoreHistoryDisplay = document.getElementById("scoreHistoryDisplay");
+      const attemptDisplay = document.getElementById("attemptDisplay");
+      const timerCard = document.getElementById("timerCard");
+      const totalTimeCard = document.getElementById("totalTimeCard");
+
+      timerDisplay.textContent = formatTime(remainingSeconds);
+      totalTimeDisplay.textContent = `${formatTime(totalElapsedSeconds)}／${formatTime(totalTimeLimitSeconds)}`;
+      scoreDisplay.textContent = scoreHistory.length ? `最新：${lastScore}／${maxScore}` : "尚未作答";
+      if (scoreHistoryDisplay) scoreHistoryDisplay.innerHTML = formatScoreHistory();
+      attemptDisplay.textContent = `${attemptCount} 次`;
+
+      timerCard.classList.toggle("timer-warning", remainingSeconds <= 15 && remainingSeconds > 0);
+      timerCard.classList.toggle("timer-danger", remainingSeconds === 0);
+      totalTimeCard.classList.toggle("timer-warning", totalElapsedSeconds >= 240 && totalElapsedSeconds < totalTimeLimitSeconds);
+      totalTimeCard.classList.toggle("timer-danger", totalElapsedSeconds >= totalTimeLimitSeconds);
+      updateReportPreview();
+    }
+
+    function setActivityLocked(isLocked, reason = "") {
+      activityLocked = isLocked;
+
+      document.querySelectorAll(".card").forEach(card => {
+        card.draggable = !isLocked;
+        card.classList.toggle("locked", isLocked);
+      });
+
+      document.querySelectorAll(".mini-btn").forEach(btn => {
+        btn.disabled = isLocked;
+      });
+
+      document.querySelectorAll(".dropzone").forEach(zone => {
+        zone.classList.toggle("not-started", isLocked && reason === "prestart");
+      });
+
+      document.getElementById("checkBtn").disabled = isLocked;
+      document.getElementById("hintBtn").disabled = isLocked && reason === "prestart";
+      document.getElementById("shuffleBtn").disabled = totalTimeUp;
+      document.getElementById("resetTimerBtn").disabled = totalTimeUp;
+
+      const startNote = document.getElementById("startNote");
+      if (startNote) {
+        if (totalTimeUp) {
+          startNote.textContent = "累計總時間已達 300 秒，系統已停止作答。";
+          startNote.classList.remove("hidden");
+        } else {
+          startNote.textContent = "請先按「開始計時」，盤子才會解鎖；每次 75 秒。";
+          startNote.classList.toggle("hidden", !(isLocked && reason === "prestart"));
+        }
+      }
+
+      const timerBtn = document.getElementById("timerBtn");
+      timerBtn.disabled = totalTimeUp || (isLocked && reason !== "prestart");
+
+      if (isLocked) {
+        if (reason === "prestart") {
+          timerBtn.textContent = "開始計時";
+        } else if (reason === "complete") {
+          timerBtn.textContent = "已完成";
+        } else if (reason === "total") {
+          timerBtn.textContent = "已停止";
+        } else {
+          timerBtn.textContent = "時間到";
+        }
+      } else {
+        timerBtn.textContent = timerRunning ? "暫停計時" : "開始計時";
+      }
+    }
+
+    function startTimer() {
+      if (totalTimeUp || totalElapsedSeconds >= totalTimeLimitSeconds) {
+        totalTimeUp = true;
+        pauseTimer();
+        setActivityLocked(true, "total");
+        showTotalTimeUpFeedback();
+        return;
+      }
+
+      if ((activityLocked && roundStarted) || totalTimeUp) return;
+
+      if (!roundStarted) {
+        // 每次新一輪作答都強制從 75 秒開始倒數。
+        remainingSeconds = timeLimitSeconds;
+        updateStatus();
+        roundStarted = true;
+        setActivityLocked(false);
+      } else if (remainingSeconds <= 0) {
+        remainingSeconds = timeLimitSeconds;
+      }
+
+      if (timerRunning) {
+        pauseTimer();
+        return;
+      }
+
+      timerRunning = true;
+      initAudioContext();
+      document.getElementById("timerBtn").textContent = "暫停計時";
+      playTickSound();
+
+      timerId = window.setInterval(() => {
+        remainingSeconds = Math.max(0, remainingSeconds - 1);
+        totalElapsedSeconds = Math.min(totalTimeLimitSeconds, totalElapsedSeconds + 1);
+        updateStatus();
+
+        if (totalElapsedSeconds >= totalTimeLimitSeconds) {
+          pauseTimer();
+          totalTimeUp = true;
+          setActivityLocked(true, "total");
+          checkAnswers({ auto: true, totalLimit: true });
+          return;
+        }
+
+        if (remainingSeconds > 0) playTickSound();
+
+        if (remainingSeconds === 0) {
+          pauseTimer();
+          setActivityLocked(true, "timeup");
+          checkAnswers({ auto: true });
+        }
+      }, 1000);
+
+      updateStatus();
+    }
+
+    function pauseTimer() {
+      if (timerId) {
+        window.clearInterval(timerId);
+        timerId = null;
+      }
+      timerRunning = false;
+      if (!activityLocked) {
+        document.getElementById("timerBtn").textContent = "開始計時";
+      }
+      updateStatus();
+    }
+
+    function resetTimerOnly() {
+      if (totalTimeUp) return;
+      pauseTimer();
+      remainingSeconds = timeLimitSeconds;
+      roundStarted = false;
+      lastScore = 0;
+      setActivityLocked(true, "prestart");
+      resetAllCounters({ preserveAttempts: true, preserveTotalTime: true });
+    }
+
+    function resetRoundStatus() {
+      pauseTimer();
+      remainingSeconds = timeLimitSeconds;
+      totalElapsedSeconds = 0;
+      attemptCount = 0;
+      lastScore = 0;
+      scoreHistory = [];
+      roundStarted = false;
+      totalTimeUp = false;
+      setActivityLocked(true, "prestart");
+      resetAllCounters({ preserveAttempts: false, preserveTotalTime: false });
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function createCard(card) {
+      const el = document.createElement("article");
+      el.className = "card";
+      el.draggable = !activityLocked;
+      el.dataset.id = card.id;
+      el.setAttribute("tabindex", "0");
+      el.setAttribute("aria-label", `${card.term}，拖曳分類卡片`);
+
+      el.innerHTML = `
+        <div class="card-icon" aria-hidden="true">${card.icon}</div>
+        <div>
+          <div class="term">${card.term}</div>
+          <div class="vn">${card.vn}</div>
+        </div>
+        <div class="hint">提示：${card.hint}</div>
+        <div class="mobile-actions" aria-label="快速分類按鈕">
+          <button class="mini-btn move-salary" type="button" data-move="salary">放到薪資</button>
+          <button class="mini-btn move-benefit" type="button" data-move="benefit">放到福利</button>
+          <button class="mini-btn move-unsure" type="button" data-move="unsure">不確定</button>
+        </div>
+      `;
+
+      el.addEventListener("dragstart", event => {
+        if (activityLocked) {
+          event.preventDefault();
+          return;
+        }
+        clearCardState(el);
+        el.classList.add("dragging");
+        event.dataTransfer.setData("text/plain", card.id);
+      });
+
+      el.addEventListener("dragend", () => {
+        el.classList.remove("dragging");
+        updateCounts();
+      });
+
+      el.addEventListener("click", event => {
+        if (activityLocked || totalTimeUp) return;
+        const move = event.target?.dataset?.move;
+        if (move && zones[move]) {
+          clearCardState(el);
+          zones[move].appendChild(el);
+          updateCounts();
+          return;
+        }
+        if (!event.target.closest("button")) {
+          el.classList.toggle("show-hint");
+        }
+      });
+
+      return el;
+    }
+
+    function clearCardState(cardEl) {
+      cardEl.classList.remove("correct", "incorrect", "pending");
+      cardEl.querySelectorAll(".tag").forEach(tag => tag.remove());
+    }
+
+    function clearAllStates() {
+      document.querySelectorAll(".card").forEach(clearCardState);
+      document.getElementById("feedback").classList.add("hidden");
+      document.getElementById("feedbackContent").innerHTML = "";
+    }
+
+    function addTag(cardEl, text, kind) {
+      const old = cardEl.querySelector(".tag");
+      if (old) old.remove();
+      const tag = document.createElement("span");
+      tag.className = `tag ${kind}`;
+      tag.textContent = text;
+      cardEl.appendChild(tag);
+    }
+
+    function renderCards() {
+      // 重新洗牌時，必須先清空所有盤子與待分類區，避免舊卡片留在答案盤中。
+      zones.bank.innerHTML = "";
+      zones.salary.innerHTML = "";
+      zones.benefit.innerHTML = "";
+      zones.unsure.innerHTML = "";
+
+      shuffle(cards).forEach(card => {
+        const el = createCard(card);
+        if (showHints) el.classList.add("show-hint");
+        zones.bank.appendChild(el);
+      });
+      if (totalTimeUp) {
+        setActivityLocked(true, "total");
+      } else if (roundStarted) {
+        setActivityLocked(false);
+      } else {
+        setActivityLocked(true, "prestart");
+      }
+      updateCounts();
+    }
+
+    function resetAndShuffle() {
+      // 重新洗牌：清空盤子、重設本次75秒倒數與本輪得分；檢查次數與累計總時間保留。
+      if (totalTimeUp) {
+        showTotalTimeUpFeedback();
+        return;
+      }
+
+      clearAllStates();
+
+      zones.bank.innerHTML = "";
+      zones.salary.innerHTML = "";
+      zones.benefit.innerHTML = "";
+      zones.unsure.innerHTML = "";
+
+      lastScore = 0;
+      remainingSeconds = timeLimitSeconds;
+      roundStarted = false;
+
+      renderCards();
+      setActivityLocked(true, "prestart");
+      resetAllCounters({ preserveAttempts: true, preserveTotalTime: true });
+
+      const feedback = document.getElementById("feedback");
+      const content = document.getElementById("feedbackContent");
+      content.innerHTML = "";
+      feedback.classList.add("hidden");
+    }
+
+    function updateCounts() {
+      document.getElementById("bankCount").textContent = zones.bank.children.length;
+      document.getElementById("salaryCount").textContent = zones.salary.children.length;
+      document.getElementById("benefitCount").textContent = zones.benefit.children.length;
+      document.getElementById("unsureCount").textContent = zones.unsure.children.length;
+    }
+
+    function resetAllCounters({ preserveAttempts = false, preserveTotalTime = false } = {}) {
+      // 重新洗牌時清空盤子與本輪得分；可保留檢查次數與各次得分紀錄。
+      updateCounts();
+      lastScore = 0;
+      if (!preserveAttempts) {
+        attemptCount = 0;
+        scoreHistory = [];
+      }
+      if (!preserveTotalTime) {
+        totalElapsedSeconds = 0;
+        totalTimeUp = false;
+      }
+      remainingSeconds = timeLimitSeconds;
+      document.getElementById("scoreDisplay").textContent = scoreHistory.length ? `最新：${lastScore}／${maxScore}` : "尚未作答";
+      document.getElementById("attemptDisplay").textContent = `${attemptCount} 次`;
+      document.getElementById("timerDisplay").textContent = formatTime(timeLimitSeconds);
+      document.getElementById("totalTimeDisplay").textContent = `${formatTime(totalElapsedSeconds)}／${formatTime(totalTimeLimitSeconds)}`;
+      const scoreHistoryDisplay = document.getElementById("scoreHistoryDisplay");
+      if (scoreHistoryDisplay) scoreHistoryDisplay.innerHTML = formatScoreHistory();
+      updateStatus();
+    }
+
+    function getCardData(id) {
+      return cards.find(card => card.id === id);
+    }
+
+    function getCardZone(cardEl) {
+      const parent = cardEl.parentElement;
+      if (parent === zones.salary) return "salary";
+      if (parent === zones.benefit) return "benefit";
+      if (parent === zones.unsure) return "unsure";
+      return "bank";
+    }
+
+    function checkAnswers(options = {}) {
+      const { auto = false, totalLimit = false } = options;
+
+      // 手動按「檢查答案」時，立即停止倒數與滴答聲。
+      // 若是時間到自動檢查，計時器已在前一步停止，不需重複處理。
+      if (!auto) {
+        pauseTimer();
+      }
+
+      if (!roundStarted && !auto) {
+        const feedback = document.getElementById("feedback");
+        const content = document.getElementById("feedbackContent");
+        content.innerHTML = `<p><strong>提醒：</strong>請先按「開始計時」，再開始作答與檢查答案。</p>`;
+        feedback.classList.remove("hidden");
+        feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
+      clearAllStates();
+
+      attemptCount++;
+
+      let correct = 0;
+      let wrong = 0;
+      let pending = 0;
+      const details = [];
+
+      document.querySelectorAll(".card").forEach(cardEl => {
+        const card = getCardData(cardEl.dataset.id);
+        const zone = getCardZone(cardEl);
+
+        if (zone === "bank" || zone === "unsure") {
+          pending++;
+          cardEl.classList.add("pending");
+          addTag(cardEl, "再想想", "warn");
+          details.push(`「${card.term}」還在「${labels[zone]}」：請判斷它比較像工作報酬，還是公司支持與照顧。正解是「${card.label}」。`);
+          return;
+        }
+
+        if (zone === card.category) {
+          correct++;
+          cardEl.classList.add("correct");
+          addTag(cardEl, "正確", "ok");
+        } else {
+          wrong++;
+          cardEl.classList.add("incorrect");
+          addTag(cardEl, `正解：${card.label}`, "bad");
+          details.push(`「${card.term}」放在「${labels[zone]}」，但正解是「${card.label}」。提示：${card.hint}`);
+        }
+      });
+
+      const total = cards.length;
+      const sorted = total - pending;
+      const percent = Math.round((correct / total) * 100);
+      const score = correct * 5;
+      lastScore = score;
+      scoreHistory.push({
+        attempt: attemptCount,
+        score,
+        correct,
+        total,
+        percent,
+        time: formatTime(totalElapsedSeconds)
+      });
+      updateStatus();
+
+      let message = "";
+
+      if (correct === total) {
+        message = "太好了！全班可以進入下一步：討論哪些薪資或福利最能吸引餐飲員工。";
+        pauseTimer();
+        setActivityLocked(true, "complete");
+      } else if (percent >= 80) {
+        message = "很接近了！多數概念已掌握，請再修正錯誤或不確定的卡片。";
+      } else if (percent >= 60) {
+        message = "已經有基礎概念，但還需要再比較「工作報酬」與「支持照顧」的差異。";
+      } else {
+        message = "建議先回到定義：薪資是員工工作後拿到的報酬；福利是公司提供的生活、健康或發展支持。";
+      }
+
+      if (totalLimit) {
+        message = `累計總時間已達 300 秒，系統已停止作答並自動檢查答案。${message}`;
+        totalTimeUp = true;
+        setActivityLocked(true, "total");
+      } else if (auto) {
+        message = `本次 75 秒時間到！系統已自動檢查答案。${message}`;
+      }
+
+      const feedback = document.getElementById("feedback");
+      const content = document.getElementById("feedbackContent");
+      content.innerHTML = `
+        <div class="score">本次得分：${score}／${maxScore}（答對 ${correct}／${total} 張，${percent}%）｜檢查次數：${attemptCount} 次｜已分類：${sorted} 張｜仍不確定：${pending} 張</div>
+        <div class="score-history">${formatScoreHistory()}</div>
+        <p><strong>回饋：</strong>${message}</p>
+        <p><strong>繳交方式：</strong>請確認已輸入姓名，再按「一鍵複製成績」，貼到老師指定的位置。</p>
+        ${details.length ? `<ol class="feedback-list">${details.map(item => `<li>${item}</li>`).join("")}</ol>` : ""}
+      `;
+      feedback.classList.remove("hidden");
+      feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function showTotalTimeUpFeedback() {
+      const feedback = document.getElementById("feedback");
+      const content = document.getElementById("feedbackContent");
+      content.innerHTML = `
+        <div class="score">累計總時間：${formatTime(totalElapsedSeconds)}／${formatTime(totalTimeLimitSeconds)}｜檢查次數：${attemptCount} 次｜最後得分：${lastScore}／${maxScore}</div>
+        <div class="score-history">${formatScoreHistory()}</div>
+        <p><strong>提醒：</strong>累計總時間已達 300 秒，系統已停止作答。請輸入姓名後按「一鍵複製成績」，再交給老師。</p>
+      `;
+      feedback.classList.remove("hidden");
+      feedback.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function attachDropEvents() {
+      document.querySelectorAll(".dropzone, .bank").forEach(zone => {
+        zone.addEventListener("dragover", event => {
+          event.preventDefault();
+        });
+        zone.addEventListener("drop", event => {
+          event.preventDefault();
+          if (activityLocked || totalTimeUp) return;
+          const id = event.dataTransfer.getData("text/plain");
+          const cardEl = document.querySelector(`.card[data-id="${id}"]`);
+          if (!cardEl) return;
+
+          const content = zone.classList.contains("bank")
+            ? zones.bank
+            : zone.querySelector(".drop-content");
+
+          clearCardState(cardEl);
+          content.appendChild(cardEl);
+          updateCounts();
+        });
+      });
+    }
+
+    function renderAnswerKey() {
+      const salaryKey = document.getElementById("salaryKey");
+      const benefitKey = document.getElementById("benefitKey");
+      salaryKey.innerHTML = cards
+        .filter(card => card.category === "salary")
+        .map(card => `<li>${card.icon} ${card.term}｜${card.vn}</li>`)
+        .join("");
+      benefitKey.innerHTML = cards
+        .filter(card => card.category === "benefit")
+        .map(card => `<li>${card.icon} ${card.term}｜${card.vn}</li>`)
+        .join("");
+    }
+
+    document.getElementById("timerBtn").addEventListener("click", startTimer);
+    document.getElementById("resetTimerBtn").addEventListener("click", resetTimerOnly);
+    document.getElementById("soundBtn").addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      if (soundEnabled) initAudioContext();
+      updateSoundButton();
+    });
+    document.getElementById("copyReportBtn").addEventListener("click", copyScoreReport);
+    document.getElementById("studentName").addEventListener("input", () => {
+      const copyStatus = document.getElementById("copyStatus");
+      copyStatus.textContent = "完成後請複製成績給老師";
+      copyStatus.style.color = "var(--muted)";
+      updateReportPreview();
+    });
+    document.getElementById("checkBtn").addEventListener("click", () => checkAnswers({ auto: false }));
+    document.getElementById("shuffleBtn").addEventListener("click", resetAndShuffle);
+    document.getElementById("hintBtn").addEventListener("click", () => {
+      showHints = !showHints;
+      document.querySelectorAll(".card").forEach(card => {
+        card.classList.toggle("show-hint", showHints);
+      });
+    });
+
+    attachDropEvents();
+    renderCards();
+    renderAnswerKey();
+    resetRoundStatus();
+    updateSoundButton();
+    updateReportPreview();
+  </script>
+</body>
+</html>
